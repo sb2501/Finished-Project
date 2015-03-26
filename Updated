@@ -1,0 +1,249 @@
+from tkinter import *
+from tkinter.filedialog import *
+
+#Creates root window, sets title, and positions window based on x and y coordinates, also sets width and height.
+root = Tk()
+root.title("Photo Editor")
+root.geometry("1000x600+200+0")
+
+#Creates menu widget and places its parent as the root window
+menu = Menu(root)
+
+#Create a file menu that will be a submenu of menu, add a open and save as to menu list.
+file = Menu(menu,tearoff=0)
+
+def open():
+    file = askopenfilename(title="Open")
+    
+file.add_command(label="Open",command=open)
+
+def save():
+    file = asksavefilename(title="Save as")
+file.add_command(label="Save as",command=save)
+
+#Function for when exit is clicked, closes root window.
+def exit():
+    root.quit()
+
+#Set initial color of line to black.
+default_color = "black"
+default_width = 1
+def select_color():
+    def confirm():
+        global default_color
+        red = slide_red.get()
+        green = slide_green.get()
+        blue = slide_blue.get()
+        slide_red.set(red)
+        slide_green.set(green)
+        slide_blue.set(blue)
+        
+        #Converts red, green, and blue values from decimal integers to hexidecimal strings
+        if (red <= 16):
+            red_str = '0%x' % (red)
+        else:
+            red_str = '%x' % (red)
+        if (green <= 16):
+            green_str = '0%x' % (green)    
+        else:
+            green_str = '%x' % (green)
+        if (blue <= 16):
+            blue_str = '0%x' % (blue)
+        else:
+            blue_str = '%x' % (blue)
+    
+        color =  '#%s%s%s' % (red_str,green_str,blue_str)
+        default_color = color
+        
+        color_viewer = Canvas(button_frame,width=20,height=20,bg=default_color)
+        color_viewer.grid(row=1,column=0,pady=10)
+        top.destroy()
+    
+    top = Toplevel()
+    top_frame = Frame(top)
+    top_frame.grid(column=1)
+    top_frame.configure(width=200,height=200)
+    
+    #Changed entry fields to sldiers, purely to try a different method, can easily be changed back
+    label_red = Label(top_frame,text="Red")
+    label_red.grid(row=0,column=0)
+    slide_red = Scale(top_frame, from_=0, to=255, orient=HORIZONTAL)
+    slide_red.grid(row=0,column = 1)
+    
+    label_green = Label(top_frame,text="Green")
+    label_green.grid(row=3,column=0)
+    slide_green = Scale(top_frame, from_=0, to=255, orient=HORIZONTAL)
+    slide_green.grid(row=3,column = 1)
+    
+    label_blue = Label(top_frame,text="Blue")
+    label_blue.grid(row=5,column=0)
+    slide_blue = Scale(top_frame, from_=0, to=255, orient=HORIZONTAL)
+    slide_blue.grid(row=5,column = 1)
+    
+    confirm_button = Button(top_frame,text="Confirm",command=confirm)
+    confirm_button.grid(row=7,column=0)
+    
+   
+  
+#Removes shape items within canvas
+def clear():
+    canvas.delete('all')
+    
+#Add exit to file menu list.
+file.add_command(label="Exit",command=exit)
+
+#Edit menu is added to menu
+edit = Menu(menu,tearoff=0)
+edit.add_command(label="Select Color",command=select_color)
+edit.add_command(label="Clear",command=clear)
+menu.add_cascade(label="File",menu=file)
+menu.add_cascade(label="Edit",menu=edit)
+
+#Adds menu to root window.
+root.config(menu=menu)
+
+
+#Canvas widget
+canvas = Canvas(root,bg="white",width=1000,height=400)
+canvas.pack(side=TOP,anchor=N)
+
+def pen_tool():
+    #Set initial x and y coordinates to 0 for line
+    last_x, last_y = 0,0
+
+    def set_xy(event):
+        #Reference the variables in function
+        global last_x,last_y
+        #Set global equal to current mouse coordinates
+        last_x,last_y = event.x,event.y
+
+    def draw_pen(event):
+        #Reference changed global variables
+        global last_x,last_y
+        
+        #Take set values for x1 and y1, then set x2 and y2 equal to current mouse coordinates
+        line = canvas.create_line(last_x,last_y,event.x,event.y,fill=default_color,width=default_width)
+        #Change the start coordinates to the end coordinates
+        last_x,last_y = event.x, event.y
+
+    #Binds the left mouse button and when mouse button is held down to corresponding callback functions.
+    canvas.bind("<Button-1>",set_xy)
+    canvas.bind("<B1-Motion>",draw_pen)
+
+#Frame that will contain quick pick colors.
+color_frame = Frame(root, width=30,height=90,padx=10,pady=10)
+color_frame.pack(side=LEFT,anchor=NW)
+#Images for buttons
+image_files = ["Button1.gif","Button2.gif","Button3.gif"]
+color_files = ["red.gif","orange.gif","yellow.gif","green.gif","blue.gif","purple.gif"]
+
+
+ ########Color bar functionality#############################################
+def buttonRed_clicked():
+    global default_color
+    default_color='#FF0000'
+imgRed = PhotoImage(file=color_files[0])
+buttonRed = Button(color_frame,image=imgRed,command=buttonRed_clicked)
+buttonRed.image = imgRed
+buttonRed.grid(row=1,column=0)
+def buttonOrange_clicked():
+    global default_color
+    default_color='#F26522'
+imgOrange = PhotoImage(file=color_files[1])
+buttonOrange = Button(color_frame,image=imgOrange,command=buttonOrange_clicked)
+buttonOrange.image = imgOrange
+buttonOrange.grid(row=1,column=1)
+def buttonYellow_clicked():
+    global default_color
+    default_color='#FFFF00'
+imgYellow = PhotoImage(file=color_files[2])
+buttonYellow = Button(color_frame,image=imgYellow,command=buttonYellow_clicked)
+buttonYellow.image = imgYellow
+buttonYellow.grid(row=1,column=2)
+def buttonGreen_clicked():
+    global default_color
+    default_color='#00FF00'
+imgGreen = PhotoImage(file=color_files[3])
+buttonGreen = Button(color_frame,image=imgGreen,command=buttonGreen_clicked)
+buttonGreen.image = imgGreen
+buttonGreen.grid(row=1,column=3)
+def buttonBlue_clicked():
+    global default_color
+    default_color='#0000FF'
+imgBlue = PhotoImage(file=color_files[4])
+buttonBlue = Button(color_frame,image=imgBlue,command=buttonBlue_clicked)
+buttonBlue.image = imgBlue
+buttonBlue.grid(row=1,column=4)
+def buttonPurple_clicked():
+    global default_color
+    default_color='#662D91'
+imgPurple = PhotoImage(file=color_files[5])
+buttonPurple = Button(color_frame,image=imgPurple,command=buttonPurple_clicked)
+buttonPurple.image = imgPurple
+buttonPurple.grid(row=1,column=5)
+
+
+#Frame that will contain tools in toolbar
+button_frame = Frame(root)
+button_frame.pack(side=TOP,anchor=S)
+
+image_files = ["Button1.gif","Button2.gif","Button3.gif"]
+
+#Button class for tools.
+def create_buttons():
+    global button_frame
+    global image_files
+    
+    img1 = PhotoImage(file=image_files[0])
+    button1 = Button(button_frame,image=img1)
+    button1.image = img1
+    button1.grid(row=0,column=0)
+    
+    #When button 1 is clicked the pen_tool function is called to draw lines.
+    def button1_clicked(event):
+        pen_tool()
+        root.configure(cursor="pencil")
+    button1.bind("<Button-1>",button1_clicked)
+    
+    img2 = PhotoImage(file=image_files[1])
+    button2 = Button(button_frame,image=img2)
+    button2.image = img2
+    button2.grid(row=0,column=1)
+      
+    def button3_clicked():
+       global button3
+       def erase(event): 
+            x,y = event.x, event.y
+            canvas.create_rectangle(x,y,x+20,y+20,fill="white",outline="white")
+       canvas.bind("<B1-Motion>",erase)
+       root.configure(cursor="icon")
+    
+    img3 = PhotoImage(file=image_files[2])
+    button3 = Button(button_frame,image=img3,command=button3_clicked)
+    button3.image = img3
+    button3.grid(row=0,column=2)
+  
+width_option_frame = Frame(root)
+width_option_frame.pack(side=TOP,anchor=S)
+
+val1 = 1
+val2 = 2
+val3 = 3
+val4 = 4
+
+def change_val():
+    current_val = int(width_option.get())
+    global default_width
+    default_width = current_val
+    
+width_label = Label(width_option_frame,text="Width:")
+width_label.grid(row=0,column=0)
+width_option = Spinbox(width_option_frame,values=(val1,val2,val3,val4),command=change_val)
+width_option.grid(row=0,column=1)
+px = Label(width_option_frame,text="px")
+px.grid(row=0,column=2)
+
+
+#Creates instance of create_buttons class.
+create_buttons()
+root.mainloop()
